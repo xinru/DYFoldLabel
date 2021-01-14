@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString *text;
 @property (nonatomic, assign) CGFloat textHeight;
 @property (nonatomic, strong) DYLabelModel *labelModel;
+
+@property (nonatomic, assign) BOOL isFolded;
 @end
 
 NS_ASSUME_NONNULL_END

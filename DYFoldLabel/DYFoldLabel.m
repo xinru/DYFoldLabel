@@ -55,6 +55,7 @@ static NSString *kDisplay = @"KisDisplay";
     CFArrayRef lines = CTFrameGetLines(frameRef);
     if (!lines || CFArrayGetCount(lines) == 0) return;
     CFIndex cfindex = CFArrayGetCount(lines);
+    cfindex = self.numberOfLines;
     //计算第几行结束,折叠文字字体大于文本字体会占用多行
     CFIndex endLineIndex = [self lineReplaceWithLine:cfindex lines:lines fontDiff:self.model.foldFont.pointSize - self.font.pointSize];
     self.model.endLineIndex = endLineIndex;
@@ -67,7 +68,20 @@ static NSString *kDisplay = @"KisDisplay";
         //获取需要替换的文字长度
         NSInteger length = [self subLenthWithString:attributeText lineRange:trimRange text:[NSString stringWithFormat:@"… %@",self.model.foldText] textFont:self.model.foldFont];
         //省略号前需要添加的文字
-        attributeText = [[attributeText attributedSubstringFromRange:NSMakeRange(0, lineRange.location + lineRange.length - length)] mutableCopy];
+//        attributeText = [[attributeText attributedSubstringFromRange:NSMakeRange(0, lineRange.location + lineRange.length - length)] mutableCopy];
+        
+        //        针对特殊字符做的处理，例如：问问\r\nwee\r\n
+        if (lineRange.location+lineRange.length > length) {
+            //省略号前需要添加的文字
+            attributeText = [[attributeText attributedSubstringFromRange:NSMakeRange(0, lineRange.location + lineRange.length - length)] mutableCopy];
+        }else{
+            //省略号前需要添加的文字
+            NSString *text = [attributeText string];
+            while ([text hasSuffix:@"\n"] || [text hasSuffix:@"\r"]) {
+                text = [self removeLastOneChar:text];
+            }
+            attributeText = [[NSMutableAttributedString alloc] initWithString:text attributes:@{NSFontAttributeName:self.font}];;
+        }
         
         [attributeText appendAttributedString:[[NSAttributedString alloc] initWithString:@"… "]];
         [attributeText appendAttributedString:foldAttText];
@@ -90,7 +104,17 @@ static NSString *kDisplay = @"KisDisplay";
     }
     [self layoutIfNeeded];
 }
-
+//移除最后一个字符
+- (NSString*)removeLastOneChar:(NSString*)origin
+{
+    NSString* cutted;
+    if([origin length] > 0){
+        cutted = [origin substringToIndex:([origin length]-1)];// 去掉最后一个","
+    }else{
+        cutted = origin;
+    }
+    return cutted;
+}
 - (void)foldLabel:(BOOL)folded {
     if (folded) {
         self.numberOfLines = 0;
@@ -177,7 +201,18 @@ static NSString *kDisplay = @"KisDisplay";
     if (!lines || CFArrayGetCount(lines) == 0) return;
     //获取行上行、下行、间距
     CGFloat ascent = 0,descent = 0,leading = 0;
-    CTLineRef endLine = CFArrayGetValueAtIndex(lines, endLineIndex);
+    
+//    CTLineRef endLine = CFArrayGetValueAtIndex(lines, endLineIndex);
+    
+    CTLineRef endLine = NULL;
+    NSArray *array = (__bridge NSArray *)lines;
+    long index = endLineIndex;
+    if ([array count] > index) {
+        endLine = CFArrayGetValueAtIndex(lines, endLineIndex);
+    }else{
+        endLine = CFArrayGetValueAtIndex(lines, [array count]-1);
+    }
+    
     CTLineGetTypographicBounds(endLine, &ascent, &descent, &leading);
     
     

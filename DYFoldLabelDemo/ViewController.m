@@ -24,7 +24,7 @@
     [super viewDidLoad];
     
     NSArray *textArray = @[
-                           @"新浪科技讯 北京时间7月31日凌晨消息，苹果公司股价在纳斯达克常规交易中下跌0.90美元，报收于208.78美元，跌幅为0.43%，财报发布后，在随后截至美国东部时间周二下午5点01分（北京时间周三凌晨5点01分）为止的盘后交易中，苹果股价上涨4.13%。过去52周，苹果公司的最高价为233.47美元，最低价为142.00美元。",
+                           @"新浪科技\r\r\n\n\r\n\r 北京时间7月31日凌晨消息，苹果公司股价在纳斯达克常规交易中下跌0.90美元，报收于208.78美元，跌幅为0.43%，财报发布后，在随后截至美国东部时间周二下午5点01分（北京时间周三凌晨5点01分）为止的盘后交易中，苹果股价上涨4.13%。过去52周，苹果公司的最高价为233.47美元，最低价为142.00美元。",
                            @"NSDecimalNumber可以定制四种精度的取正类型分别是：向上取正、向下取正、四舍五入和特殊的四舍五入（碰到保留位数后一位的数字为5时，根据前一位的奇偶性决定。为偶时向下取正，为奇数时向上取正如：1.25保留1为小数。5之前是2偶数向下取正1.2；1.35保留1位小数时。5之前为3奇数，向上取正1.4）。",
                            @"5月28日消息，昨日比特币创下价格新高，突破8845美元，市值达到1568亿美元，创下了比特币价格和市值12个月来的最高纪录。",
                            @"苹果公司今天发布了2019财年第三财季业绩。报告显示，苹果公司第三财季净营收为538.09亿美元，比去年同期的532.65亿美元增长1%；净利润为100.44亿美元，比去年同期的115.19亿美元下降13%。",
@@ -57,6 +57,7 @@
     _tableView.dataSource = self;
     _tableView.backgroundColor = [UIColor groupTableViewBackgroundColor];
     _tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 1, 1)];
+    _tableView.estimatedRowHeight = 50;
     [self.view addSubview:_tableView];
 }
 
@@ -87,6 +88,7 @@
                             LabelWidth:[UIScreen mainScreen].bounds.size.width - 30
                             clickBlock:^(BOOL isFolded, NSIndexPath * _Nonnull path, CGFloat currentHeight) {
             DemoModel *cellModel = self.dataArray[path.row];
+            cellModel.isFolded = isFolded;
             cellModel.textHeight = currentHeight;
             NSLog(@"点击");
             [self.tableView reloadData];
@@ -95,12 +97,17 @@
     return cell;
 }
 
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (self.dataArray.count > indexPath.row) {
-        DemoModel *model = self.dataArray[indexPath.row];
-        return model.textHeight;
-    }
-    return 0;
+//- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+//    if (self.dataArray.count > indexPath.row) {
+//        DemoModel *model = self.dataArray[indexPath.row];
+//        return model.textHeight;
+//    }
+//    return 0;
+//}
+
+- (CGFloat)tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return UITableViewAutomaticDimension;
 }
 
 @end
